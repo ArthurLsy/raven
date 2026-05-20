@@ -42,6 +42,14 @@ jobs:
           name: "Raven ${{ github.ref_name }}"
           prerelease: true
           generate_release_notes: true
+          body: |
+            ## Installation macOS
+
+            > **"Raven est endommagé"** — l'app n'est pas encore signée. Après avoir glissé Raven.app dans `/Applications`, ouvre un Terminal et exécute :
+            > ```
+            > xattr -cr /Applications/Raven.app
+            > ```
+            > Puis relance l'app normalement.
           files: |
             src-tauri/target/release/bundle/macos/Raven-macos-silicon.zip
             src-tauri/target/release/bundle/dmg/*.dmg
