@@ -3,7 +3,7 @@ name: Release
 on:
   push:
     tags:
-      - 'ALPHA-*'
+      - '[0-9]*.*.*'
   workflow_dispatch:
 
 jobs:
@@ -29,18 +29,18 @@ jobs:
       - run: bun install
 
       - name: Build
-        run: bun run tauri build --bundles app,dmg
+        run: bun run tauri build --bundles app
 
-      - name: Zip .app
+      - name: Archive .app
         run: |
           cd src-tauri/target/release/bundle/macos
-          zip -r Raven-macos-silicon.zip "Raven.app"
+          tar -czf Raven-macos-silicon.tar.gz "Raven.app"
 
       - name: Upload to release
         uses: softprops/action-gh-release@v2
         with:
           name: "Raven ${{ github.ref_name }}"
-          prerelease: true
+          prerelease: false
           generate_release_notes: true
           body: |
             ## Installation macOS
@@ -50,9 +50,7 @@ jobs:
             > xattr -cr /Applications/Raven.app
             > ```
             > Puis relance l'app normalement.
-          files: |
-            src-tauri/target/release/bundle/macos/Raven-macos-silicon.zip
-            src-tauri/target/release/bundle/dmg/*.dmg
+          files: src-tauri/target/release/bundle/macos/Raven-macos-silicon.tar.gz
 
   build-macos-intel:
     runs-on: macos-13
@@ -76,21 +74,19 @@ jobs:
       - run: bun install
 
       - name: Build
-        run: bun run tauri build --bundles app,dmg
+        run: bun run tauri build --bundles app
 
-      - name: Zip .app
+      - name: Archive .app
         run: |
           cd src-tauri/target/release/bundle/macos
-          zip -r Raven-macos-intel.zip "Raven.app"
+          tar -czf Raven-macos-intel.tar.gz "Raven.app"
 
       - name: Upload to release
         uses: softprops/action-gh-release@v2
         with:
           name: "Raven ${{ github.ref_name }}"
-          prerelease: true
-          files: |
-            src-tauri/target/release/bundle/macos/Raven-macos-intel.zip
-            src-tauri/target/release/bundle/dmg/*.dmg
+          prerelease: false
+          files: src-tauri/target/release/bundle/macos/Raven-macos-intel.tar.gz
 
   build-windows:
     runs-on: windows-latest
@@ -120,7 +116,7 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           name: "Raven ${{ github.ref_name }}"
-          prerelease: true
+          prerelease: false
           files: |
             src-tauri/target/release/bundle/nsis/*.exe
             src-tauri/target/release/bundle/msi/*.msi
