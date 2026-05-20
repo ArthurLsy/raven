@@ -1,0 +1,9 @@
+pub mod branches;
+pub mod commit;
+pub mod diff;
+pub mod history;
+pub mod prefs;
+pub mod remotes;
+pub mod repository;
+pub mod staging;
+pub mod status;
