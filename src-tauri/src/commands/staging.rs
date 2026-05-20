@@ -29,6 +29,57 @@ pub async fn unstage_all(repo_path: String) -> AppResult<()> {
     Ok(())
 }
 
+/// Stage a single hunk by applying its patch to the index.
+#[tauri::command]
+pub async fn stage_hunk(
+    repo_path: String,
+    file_path: String,
+    raw_patch: String,
+) -> AppResult<()> {
+    let git = GitCommand::new(&repo_path)?;
+    let patch = build_patch(&file_path, &raw_patch);
+    git.run_with_stdin(
+        &["apply", "--cached", "--recount", "--whitespace=nowarn", "-"],
+        &patch,
+    )?;
+    Ok(())
+}
+
+/// Unstage a single hunk by reverse-applying its patch to the index.
+#[tauri::command]
+pub async fn unstage_hunk(
+    repo_path: String,
+    file_path: String,
+    raw_patch: String,
+) -> AppResult<()> {
+    let git = GitCommand::new(&repo_path)?;
+    let patch = build_patch(&file_path, &raw_patch);
+    git.run_with_stdin(
+        &[
+            "apply",
+            "--cached",
+            "--reverse",
+            "--recount",
+            "--whitespace=nowarn",
+            "-",
+        ],
+        &patch,
+    )?;
+    Ok(())
+}
+
+fn build_patch(file_path: &str, raw_hunk: &str) -> String {
+    let mut p = String::new();
+    p.push_str(&format!("diff --git a/{file_path} b/{file_path}\n"));
+    p.push_str(&format!("--- a/{file_path}\n"));
+    p.push_str(&format!("+++ b/{file_path}\n"));
+    p.push_str(raw_hunk);
+    if !raw_hunk.ends_with('\n') {
+        p.push('\n');
+    }
+    p
+}
+
 /// Discard local changes for a file. Caller must confirm before invoking.
 #[tauri::command]
 pub async fn discard_file(repo_path: String, file_path: String) -> AppResult<()> {

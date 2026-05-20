@@ -36,11 +36,38 @@ export type GitStatus = {
   files: GitFileStatus[];
 };
 
+export type LineKind = "ctx" | "add" | "del";
+
+export type DiffLineDTO = {
+  t: LineKind;
+  n1: number | null;
+  n2: number | null;
+  s: string;
+};
+
+export type Hunk = {
+  header: string;
+  oldStart: number;
+  oldCount: number;
+  newStart: number;
+  newCount: number;
+  rawText: string;
+  lines: DiffLineDTO[];
+};
+
 export type FileDiff = {
   path: string;
   staged: boolean;
-  diff: string;
+  additions: number;
+  deletions: number;
   isBinary: boolean;
+  hunks: Hunk[];
+};
+
+export type CommitStatsDTO = {
+  f: number;
+  a: number;
+  d: number;
 };
 
 export type CommitSummary = {
@@ -50,6 +77,18 @@ export type CommitSummary = {
   authorEmail: string;
   date: string;
   subject: string;
+  body: string;
+  parents: string[];
+  refs: string[];
+  stats: CommitStatsDTO;
+  branchColor: number;
+};
+
+export type CommitFile = {
+  path: string;
+  status: string;
+  a: number;
+  d: number;
 };
 
 export type GraphCommit = {
@@ -66,6 +105,54 @@ export type GitBranch = {
   name: string;
   current: boolean;
   upstream: string | null;
+};
+
+export type LastCommitInfo = {
+  hash: string;
+  short: string;
+  msg: string;
+  author: string;
+  time: string;
+};
+
+export type EnrichedBranch = {
+  name: string;
+  current: boolean;
+  upstream: string | null;
+  ahead: number;
+  behind: number;
+  lastCommit: LastCommitInfo | null;
+  lane: number;
+  merged: boolean;
+  stale: boolean;
+};
+
+export type TagInfo = {
+  name: string;
+  hash: string;
+  short: string;
+  time: string;
+};
+
+export type BranchesBundle = {
+  local: EnrichedBranch[];
+  remote: EnrichedBranch[];
+  tags: TagInfo[];
+};
+
+export type StashFile = {
+  path: string;
+  status: string;
+  a: number;
+  d: number;
+};
+
+export type Stash = {
+  id: string;
+  msg: string;
+  branch: string;
+  time: string;
+  files: StashFile[];
 };
 
 export type CommitResult = {
@@ -121,22 +208,51 @@ export const api = {
   discardFile: (repoPath: string, filePath: string) =>
     invoke<void>("discard_file", { repoPath, filePath }),
 
+  stageHunk: (repoPath: string, filePath: string, rawPatch: string) =>
+    invoke<void>("stage_hunk", { repoPath, filePath, rawPatch }),
+
+  unstageHunk: (repoPath: string, filePath: string, rawPatch: string) =>
+    invoke<void>("unstage_hunk", { repoPath, filePath, rawPatch }),
+
   createCommit: (repoPath: string, message: string) =>
     invoke<CommitResult>("create_commit", { repoPath, message }),
 
   getCommitHistory: (repoPath: string, limit?: number) =>
     invoke<CommitSummary[]>("get_commit_history", { repoPath, limit }),
 
+  getCommitFiles: (repoPath: string, hash: string) =>
+    invoke<CommitFile[]>("get_commit_files", { repoPath, hash }),
+
   getGraph: (repoPath: string, limit?: number) =>
     invoke<GraphCommit[]>("get_graph", { repoPath, limit }),
 
   listBranches: (repoPath: string) => invoke<GitBranch[]>("list_branches", { repoPath }),
+
+  listBranchesEnriched: (repoPath: string) =>
+    invoke<BranchesBundle>("list_branches_enriched", { repoPath }),
 
   checkoutBranch: (repoPath: string, branch: string) =>
     invoke<void>("checkout_branch", { repoPath, branch }),
 
   createBranch: (repoPath: string, branch: string) =>
     invoke<void>("create_branch", { repoPath, branch }),
+
+  mergeBranch: (repoPath: string, branch: string) =>
+    invoke<string>("merge_branch", { repoPath, branch }),
+
+  listStashes: (repoPath: string) => invoke<Stash[]>("list_stashes", { repoPath }),
+
+  stashCreate: (repoPath: string, message?: string) =>
+    invoke<string>("stash_create", { repoPath, message }),
+
+  stashPop: (repoPath: string, id: string) =>
+    invoke<string>("stash_pop", { repoPath, id }),
+
+  stashApply: (repoPath: string, id: string) =>
+    invoke<string>("stash_apply", { repoPath, id }),
+
+  stashDrop: (repoPath: string, id: string) =>
+    invoke<string>("stash_drop", { repoPath, id }),
 
   fetch: (repoPath: string) => invoke<string>("fetch", { repoPath }),
   pull: (repoPath: string) => invoke<string>("pull", { repoPath }),

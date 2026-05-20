@@ -6,4 +6,5 @@ pub mod prefs;
 pub mod remotes;
 pub mod repository;
 pub mod staging;
+pub mod stash;
 pub mod status;

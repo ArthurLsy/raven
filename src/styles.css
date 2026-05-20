@@ -1,66 +1,296 @@
+@import "@fontsource/geist-sans/300.css";
+@import "@fontsource/geist-sans/400.css";
+@import "@fontsource/geist-sans/500.css";
+@import "@fontsource/geist-sans/600.css";
+@import "@fontsource/geist-sans/700.css";
+@import "@fontsource/geist-mono/400.css";
+@import "@fontsource/geist-mono/500.css";
+@import "@fontsource/geist-mono/600.css";
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-@layer base {
-  :root {
-    --background: 0 0% 100%;
-    --foreground: 240 10% 4%;
-    --card: 0 0% 100%;
-    --card-foreground: 240 10% 4%;
-    --primary: 240 6% 10%;
-    --primary-foreground: 0 0% 98%;
-    --secondary: 240 5% 96%;
-    --secondary-foreground: 240 6% 10%;
-    --muted: 240 5% 96%;
-    --muted-foreground: 240 4% 46%;
-    --accent: 240 5% 96%;
-    --accent-foreground: 240 6% 10%;
-    --destructive: 0 84% 60%;
-    --destructive-foreground: 0 0% 98%;
-    --border: 240 6% 90%;
-    --input: 240 6% 90%;
-    --ring: 240 5% 65%;
-    --success: 142 71% 45%;
-    --warning: 38 92% 50%;
-    --diff-add: 142 70% 90%;
-    --diff-del: 0 70% 92%;
-    --radius: 0.5rem;
-  }
+/* Design tokens ─────────────────────────────────────────────────────── */
+:root,
+[data-theme="dark"] {
+  --bg-0: #0a0a0c;
+  --bg-1: #0f0f12;
+  --bg-2: #15151a;
+  --bg-3: #1c1c22;
+  --bg-4: #24242c;
+  --hover: rgba(255, 255, 255, 0.04);
+  --hover-strong: rgba(255, 255, 255, 0.07);
+  --border: #1f1f25;
+  --border-2: #2a2a32;
+  --border-strong: #3a3a44;
+  --text: #ededf0;
+  --text-2: #b8b8c0;
+  --text-3: #7a7a85;
+  --text-4: #4f4f59;
+  --shadow-lg: 0 24px 60px rgba(0, 0, 0, 0.55), 0 4px 12px rgba(0, 0, 0, 0.4);
+  --shadow-md: 0 4px 18px rgba(0, 0, 0, 0.35);
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
+  --inset: inset 0 1px 0 rgba(255, 255, 255, 0.03);
 
-  .dark {
-    --background: 240 10% 4%;
-    --foreground: 0 0% 98%;
-    --card: 240 10% 6%;
-    --card-foreground: 0 0% 98%;
-    --primary: 0 0% 98%;
-    --primary-foreground: 240 6% 10%;
-    --secondary: 240 4% 16%;
-    --secondary-foreground: 0 0% 98%;
-    --muted: 240 4% 16%;
-    --muted-foreground: 240 5% 65%;
-    --accent: 240 4% 16%;
-    --accent-foreground: 0 0% 98%;
-    --destructive: 0 63% 41%;
-    --destructive-foreground: 0 0% 98%;
-    --border: 240 4% 18%;
-    --input: 240 4% 18%;
-    --ring: 240 5% 65%;
-    --success: 142 71% 45%;
-    --warning: 38 92% 50%;
-    --diff-add: 142 50% 18%;
-    --diff-del: 0 50% 20%;
-  }
+  --add-bg: rgba(70, 200, 130, 0.10);
+  --add-bg-2: rgba(70, 200, 130, 0.18);
+  --add-fg: oklch(0.78 0.15 150);
+  --del-bg: rgba(255, 90, 110, 0.08);
+  --del-bg-2: rgba(255, 90, 110, 0.16);
+  --del-fg: oklch(0.72 0.18 20);
 
-  html,
-  body,
-  #root {
-    height: 100%;
-  }
+  --status-add: oklch(0.78 0.15 150);
+  --status-mod: oklch(0.80 0.16 80);
+  --status-del: oklch(0.72 0.18 20);
+  --status-new: oklch(0.78 0.10 240);
 
-  body {
-    @apply bg-background text-foreground;
-    overflow: hidden;
-    -webkit-font-smoothing: antialiased;
+  --tone-indigo: oklch(0.72 0.15 280);
+  --tone-amber: oklch(0.80 0.15 75);
+  --tone-rose: oklch(0.75 0.16 15);
+  --tone-cyan: oklch(0.78 0.11 220);
+  --tone-slate: oklch(0.70 0.02 250);
+
+  --accent: oklch(0.72 0.18 285);
+  --accent-2: oklch(0.65 0.20 285);
+  --accent-fg: #fff;
+  --accent-soft: oklch(0.72 0.18 285 / 0.14);
+  --accent-line: oklch(0.72 0.18 285 / 0.40);
+
+  --radius: 8px;
+}
+
+[data-theme="light"] {
+  --bg-0: #f7f7f5;
+  --bg-1: #ffffff;
+  --bg-2: #fafaf8;
+  --bg-3: #f1f1ee;
+  --bg-4: #e7e7e3;
+  --hover: rgba(0, 0, 0, 0.04);
+  --hover-strong: rgba(0, 0, 0, 0.07);
+  --border: #ebebe7;
+  --border-2: #dedeD9;
+  --border-strong: #c8c8c2;
+  --text: #18181b;
+  --text-2: #3a3a40;
+  --text-3: #6a6a72;
+  --text-4: #9a9aa0;
+  --shadow-lg: 0 24px 60px rgba(0, 0, 0, 0.12), 0 4px 12px rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 18px rgba(0, 0, 0, 0.08);
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.06);
+  --inset: inset 0 1px 0 rgba(255, 255, 255, 0.6);
+
+  --add-bg: rgba(40, 160, 90, 0.07);
+  --add-bg-2: rgba(40, 160, 90, 0.15);
+  --add-fg: oklch(0.48 0.15 150);
+  --del-bg: rgba(210, 50, 70, 0.07);
+  --del-bg-2: rgba(210, 50, 70, 0.14);
+  --del-fg: oklch(0.52 0.18 20);
+
+  --status-add: oklch(0.55 0.15 150);
+  --status-mod: oklch(0.62 0.16 60);
+  --status-del: oklch(0.55 0.18 20);
+  --status-new: oklch(0.55 0.13 240);
+
+  --tone-indigo: oklch(0.55 0.18 280);
+  --tone-amber: oklch(0.62 0.16 65);
+  --tone-rose: oklch(0.58 0.18 15);
+  --tone-cyan: oklch(0.58 0.12 220);
+  --tone-slate: oklch(0.50 0.02 250);
+
+  --accent: oklch(0.55 0.20 285);
+  --accent-2: oklch(0.48 0.22 285);
+  --accent-fg: #fff;
+  --accent-soft: oklch(0.55 0.20 285 / 0.10);
+  --accent-line: oklch(0.55 0.20 285 / 0.30);
+}
+
+/* Base ─────────────────────────────────────────────────────────────── */
+* {
+  box-sizing: border-box;
+}
+html,
+body {
+  margin: 0;
+  padding: 0;
+}
+html,
+body,
+#root {
+  height: 100%;
+}
+body {
+  background: var(--bg-0);
+  color: var(--text);
+  font-family: "Geist Sans", "Inter", -apple-system, BlinkMacSystemFont,
+    "Segoe UI", sans-serif;
+  font-feature-settings: "ss01", "cv11";
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow: hidden;
+}
+
+.mono {
+  font-family: "Geist Mono", ui-monospace, "SF Mono", Menlo, Monaco,
+    "JetBrains Mono", monospace;
+  font-feature-settings: "ss03", "calt", "liga";
+}
+
+#root {
+  width: 100vw;
+  height: 100vh;
+  background:
+    radial-gradient(
+      1200px 600px at 20% -10%,
+      color-mix(in oklch, var(--accent) 14%, transparent),
+      transparent 60%
+    ),
+    radial-gradient(
+      900px 500px at 110% 110%,
+      color-mix(in oklch, var(--accent) 8%, transparent),
+      transparent 60%
+    ),
+    var(--bg-0);
+  display: flex;
+  flex-direction: column;
+}
+
+/* Scrollbars */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--border-2);
+  border-radius: 6px;
+  border: 2px solid transparent;
+  background-clip: content-box;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--border-strong);
+  background-clip: content-box;
+  border: 2px solid transparent;
+}
+
+/* Reset */
+button,
+[role="button"] {
+  cursor: default;
+}
+button {
+  font: inherit;
+  color: inherit;
+  background: none;
+  border: 0;
+  padding: 0;
+}
+input,
+textarea,
+select {
+  font: inherit;
+  color: inherit;
+}
+input:focus,
+textarea:focus,
+button:focus,
+select:focus {
+  outline: none;
+}
+
+::selection {
+  background: var(--accent-soft);
+  color: var(--text);
+}
+
+/* Utilities */
+.row {
+  display: flex;
+  align-items: center;
+}
+.col {
+  display: flex;
+  flex-direction: column;
+}
+.gap-1 {
+  gap: 4px;
+}
+.gap-2 {
+  gap: 8px;
+}
+.gap-3 {
+  gap: 12px;
+}
+.gap-4 {
+  gap: 16px;
+}
+.muted {
+  color: var(--text-3);
+}
+.dim {
+  color: var(--text-2);
+}
+.hover-bg:hover {
+  background: var(--hover);
+}
+.hover-bg-2:hover {
+  background: var(--hover-strong);
+}
+
+/* Animations */
+@keyframes pulseDot {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 0.9;
   }
+  50% {
+    transform: scale(1.4);
+    opacity: 0.5;
+  }
+}
+.pulse-dot {
+  animation: pulseDot 2s ease-in-out infinite;
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+.shimmer {
+  background: linear-gradient(90deg, transparent, var(--hover-strong), transparent);
+  background-size: 200% 100%;
+  animation: shimmer 1.6s linear infinite;
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.slide-up {
+  animation: slideUp 240ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+.fade-in {
+  animation: fadeIn 200ms ease-out;
 }
