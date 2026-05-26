@@ -1,4 +1,5 @@
 import * as React from "react";
+import { getCurrentWindow } from "@tauri-apps/api/window";
 import { Icons, type IconComponent } from "@/lib/icons";
 import { Kbd } from "@/components/ui/kbd";
 import {
@@ -6,6 +7,10 @@ import {
   type View,
 } from "@/features/repository/repository.store";
 import { api, errorMessage, type RecentRepo } from "@/lib/tauri";
+
+function startDrag(e: React.MouseEvent) {
+  if (e.button === 0) getCurrentWindow().startDragging();
+}
 
 const TABS: { k: View; I: IconComponent; label: string }[] = [
   { k: "changes", I: Icons.Changes, label: "Changes" },
@@ -27,7 +32,6 @@ export function TopBar() {
   return (
     <div
       className="row"
-      data-tauri-drag-region
       style={{
         height: 40,
         padding: "0 12px 0 0",
@@ -38,10 +42,9 @@ export function TopBar() {
         minWidth: 0,
       }}
     >
-      {/* Traffic light zone — draggable, leaves space for macOS window controls */}
       <div
-        data-tauri-drag-region
-        style={{ width: 76, height: "100%", flexShrink: 0 }}
+        onMouseDown={startDrag}
+        style={{ width: 76, height: "100%", flexShrink: 0, cursor: "default" }}
       />
       <RepoSelector />
 
@@ -63,7 +66,7 @@ export function TopBar() {
         </span>
       )}
 
-      <div data-tauri-drag-region style={{ flex: 1, height: "100%" }} />
+      <div onMouseDown={startDrag} style={{ flex: 1, height: "100%", cursor: "default" }} />
 
       {repo && (
         <div
@@ -122,7 +125,7 @@ export function TopBar() {
         </div>
       )}
 
-      <div data-tauri-drag-region style={{ flex: 1, height: "100%" }} />
+      <div onMouseDown={startDrag} style={{ flex: 1, height: "100%", cursor: "default" }} />
 
       <button
         onClick={() => setPaletteOpen(true)}
