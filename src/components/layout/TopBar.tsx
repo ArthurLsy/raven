@@ -5,7 +5,7 @@ import {
   useRepoStore,
   type View,
 } from "@/features/repository/repository.store";
-import { api, errorMessage } from "@/lib/tauri";
+import { api, errorMessage, type RecentRepo } from "@/lib/tauri";
 
 const TABS: { k: View; I: IconComponent; label: string }[] = [
   { k: "changes", I: Icons.Changes, label: "Changes" },
@@ -19,20 +19,10 @@ export function TopBar() {
   const view = useRepoStore((s) => s.view);
   const setView = useRepoStore((s) => s.setView);
   const setPaletteOpen = useRepoStore((s) => s.setPaletteOpen);
-  const openRepository = useRepoStore((s) => s.openRepository);
 
   const changesBadge = status?.files.length ?? 0;
   const ahead = status?.ahead ?? 0;
   const behind = status?.behind ?? 0;
-
-  const handlePickRepo = async () => {
-    try {
-      const p = await api.pickFolder();
-      if (p) await openRepository(p);
-    } catch (e) {
-      useRepoStore.getState().setError(errorMessage(e));
-    }
-  };
 
   return (
     <div
@@ -47,43 +37,7 @@ export function TopBar() {
         minWidth: 0,
       }}
     >
-      <button
-        onClick={handlePickRepo}
-        className="row gap-2"
-        style={{
-          padding: "4px 8px 4px 4px",
-          borderRadius: 7,
-          background: "var(--bg-2)",
-          border: "1px solid var(--border-2)",
-          flexShrink: 0,
-          height: 30,
-        }}
-      >
-        <div
-          style={{
-            width: 22,
-            height: 22,
-            borderRadius: 5,
-            background: "var(--accent-soft)",
-            display: "grid",
-            placeItems: "center",
-            color: "var(--accent)",
-          }}
-        >
-          <Icons.FolderOpen size={12} />
-        </div>
-        <span
-          style={{
-            fontSize: 12.5,
-            fontWeight: 600,
-            color: "var(--text)",
-            whiteSpace: "nowrap",
-          }}
-        >
-          {repo?.name ?? "Open repository"}
-        </span>
-        <Icons.ChevronD size={11} stroke="var(--text-3)" />
-      </button>
+      <RepoSelector />
 
       {repo && (
         <span
@@ -193,6 +147,176 @@ export function TopBar() {
       )}
 
       {repo && <BranchPill ahead={ahead} behind={behind} branch={repo.currentBranch} />}
+    </div>
+  );
+}
+
+function RepoSelector() {
+  const repo = useRepoStore((s) => s.repo);
+  const recents = useRepoStore((s) => s.recents);
+  const refreshRecents = useRepoStore((s) => s.refreshRecents);
+  const openRepository = useRepoStore((s) => s.openRepository);
+  const [open, setOpen] = React.useState(false);
+  const wrapperRef = React.useRef<HTMLDivElement>(null);
+
+  React.useEffect(() => {
+    refreshRecents();
+  }, [refreshRecents]);
+
+  React.useEffect(() => {
+    if (!open) return;
+    const onDown = (e: MouseEvent) => {
+      if (wrapperRef.current && !wrapperRef.current.contains(e.target as Node)) {
+        setOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", onDown);
+    return () => document.removeEventListener("mousedown", onDown);
+  }, [open]);
+
+  async function handlePick() {
+    setOpen(false);
+    try {
+      const p = await api.pickFolder();
+      if (p) await openRepository(p);
+    } catch (e) {
+      useRepoStore.getState().setError(errorMessage(e));
+    }
+  }
+
+  async function handleSelectRecent(r: RecentRepo) {
+    setOpen(false);
+    try {
+      await openRepository(r.path);
+    } catch (e) {
+      useRepoStore.getState().setError(errorMessage(e));
+    }
+  }
+
+  const others = recents.filter((r) => r.path !== repo?.rootPath);
+
+  return (
+    <div ref={wrapperRef} style={{ position: "relative", flexShrink: 0 }}>
+      <button
+        onClick={() => setOpen((v) => !v)}
+        className="row gap-2"
+        style={{
+          padding: "4px 8px 4px 4px",
+          borderRadius: 7,
+          background: open ? "var(--bg-3)" : "var(--bg-2)",
+          border: "1px solid var(--border-2)",
+          height: 30,
+        }}
+      >
+        <div
+          style={{
+            width: 22,
+            height: 22,
+            borderRadius: 5,
+            background: "var(--accent-soft)",
+            display: "grid",
+            placeItems: "center",
+            color: "var(--accent)",
+          }}
+        >
+          <Icons.FolderOpen size={12} />
+        </div>
+        <span style={{ fontSize: 12.5, fontWeight: 600, color: "var(--text)", whiteSpace: "nowrap" }}>
+          {repo?.name ?? "Open repository"}
+        </span>
+        <Icons.ChevronD size={11} stroke="var(--text-3)" />
+      </button>
+
+      {open && (
+        <div
+          style={{
+            position: "absolute",
+            top: 38,
+            left: 0,
+            zIndex: 200,
+            width: 280,
+            background: "var(--bg-1)",
+            border: "1px solid var(--border)",
+            borderRadius: 10,
+            boxShadow: "var(--shadow-sm)",
+            padding: 6,
+          }}
+        >
+          {others.length > 0 && (
+            <>
+              <div
+                style={{
+                  fontSize: 10,
+                  fontWeight: 600,
+                  color: "var(--text-4)",
+                  textTransform: "uppercase",
+                  letterSpacing: "0.06em",
+                  padding: "4px 8px 6px",
+                }}
+              >
+                Recent
+              </div>
+              {others.map((r) => (
+                <button
+                  key={r.id}
+                  onClick={() => handleSelectRecent(r)}
+                  className="row gap-2"
+                  style={{
+                    width: "100%",
+                    padding: "6px 8px",
+                    borderRadius: 6,
+                    background: "transparent",
+                    border: "none",
+                    cursor: "pointer",
+                    textAlign: "left",
+                  }}
+                  onMouseEnter={(e) => {
+                    (e.currentTarget as HTMLButtonElement).style.background = "var(--bg-2)";
+                  }}
+                  onMouseLeave={(e) => {
+                    (e.currentTarget as HTMLButtonElement).style.background = "transparent";
+                  }}
+                >
+                  <Icons.FolderOpen size={13} stroke="var(--text-3)" />
+                  <div className="col" style={{ flex: 1, minWidth: 0, gap: 1 }}>
+                    <span style={{ fontSize: 12.5, fontWeight: 600, color: "var(--text)", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+                      {r.name}
+                    </span>
+                    <span className="mono" style={{ fontSize: 10.5, color: "var(--text-4)", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+                      {r.path}
+                    </span>
+                  </div>
+                </button>
+              ))}
+              <hr style={{ border: "none", borderTop: "1px solid var(--border)", margin: "4px 0" }} />
+            </>
+          )}
+          <button
+            onClick={handlePick}
+            className="row gap-2"
+            style={{
+              width: "100%",
+              padding: "6px 8px",
+              borderRadius: 6,
+              background: "transparent",
+              border: "none",
+              cursor: "pointer",
+              textAlign: "left",
+            }}
+            onMouseEnter={(e) => {
+              (e.currentTarget as HTMLButtonElement).style.background = "var(--bg-2)";
+            }}
+            onMouseLeave={(e) => {
+              (e.currentTarget as HTMLButtonElement).style.background = "transparent";
+            }}
+          >
+            <Icons.FolderOpen size={13} stroke="var(--text-3)" />
+            <span style={{ fontSize: 12.5, color: "var(--text-2)", fontWeight: 500 }}>
+              Browse for folder…
+            </span>
+          </button>
+        </div>
+      )}
     </div>
   );
 }
