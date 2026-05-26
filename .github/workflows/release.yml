@@ -52,71 +52,17 @@ jobs:
             > Puis relance l'app normalement.
           files: src-tauri/target/release/bundle/macos/Raven-macos-silicon.tar.gz
 
-  build-macos-intel:
-    runs-on: macos-13
-    permissions:
-      contents: write
+  bump-homebrew-formula:
+    needs: [build-macos-silicon]
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/')
     steps:
-      - uses: actions/checkout@v4
-
-      - uses: oven-sh/setup-bun@v2
+      - uses: mislav/bump-homebrew-formula-action@v3
         with:
-          bun-version: latest
-
-      - uses: dtolnay/rust-toolchain@stable
-        with:
-          targets: x86_64-apple-darwin
-
-      - uses: Swatinem/rust-cache@v2
-        with:
-          workspaces: src-tauri
-
-      - run: bun install
-
-      - name: Build
-        run: bun run tauri build --bundles app
-
-      - name: Archive .app
-        run: |
-          cd src-tauri/target/release/bundle/macos
-          tar -czf Raven-macos-intel.tar.gz "Raven.app"
-
-      - name: Upload to release
-        uses: softprops/action-gh-release@v2
-        with:
-          name: "Raven ${{ github.ref_name }}"
-          prerelease: false
-          files: src-tauri/target/release/bundle/macos/Raven-macos-intel.tar.gz
-
-  build-windows:
-    runs-on: windows-latest
-    permissions:
-      contents: write
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: oven-sh/setup-bun@v2
-        with:
-          bun-version: latest
-
-      - uses: dtolnay/rust-toolchain@stable
-        with:
-          targets: x86_64-pc-windows-msvc
-
-      - uses: Swatinem/rust-cache@v2
-        with:
-          workspaces: src-tauri
-
-      - run: bun install
-
-      - name: Build
-        run: bun run tauri build --bundles nsis,msi
-
-      - name: Upload to release
-        uses: softprops/action-gh-release@v2
-        with:
-          name: "Raven ${{ github.ref_name }}"
-          prerelease: false
-          files: |
-            src-tauri/target/release/bundle/nsis/*.exe
-            src-tauri/target/release/bundle/msi/*.msi
+          formula-name: raven
+          homebrew-tap: arthurlsy/homebrew-gowey
+          tag-name: ${{ github.ref_name }}
+          download-url: https://github.com/${{ github.repository }}/releases/download/${{ github.ref_name }}/Raven-macos-silicon.tar.gz
+          commit-message: "raven {{version}}"
+        env:
+          COMMITTER_TOKEN: ${{ secrets.HOMEBREW_TAP_TOKEN }}
