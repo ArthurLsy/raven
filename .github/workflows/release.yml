@@ -52,35 +52,15 @@ jobs:
             > Puis relance l'app normalement.
           files: src-tauri/target/release/bundle/macos/Raven-macos-silicon.tar.gz
 
-  bump-homebrew-formula:
+  bump-homebrew-cask:
     needs: [build-macos-silicon]
     runs-on: ubuntu-latest
     if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/')
     steps:
-      - name: Checkout tap
-        uses: actions/checkout@v4
+      - uses: macauley/action-homebrew-bump-cask@v1.0.0
         with:
-          repository: arthurlsy/homebrew-gowey
           token: ${{ secrets.HOMEBREW_TAP_TOKEN }}
-          path: tap
-
-      - name: Compute SHA256
-        id: sha
-        run: |
-          URL="https://github.com/${{ github.repository }}/releases/download/${{ github.ref_name }}/Raven-macos-silicon.tar.gz"
-          SHA=$(curl -sL "$URL" | shasum -a 256 | awk '{print $1}')
-          echo "sha256=$SHA" >> $GITHUB_OUTPUT
-
-      - name: Update cask
-        run: |
-          sed -i "s|version \".*\"|version \"${{ github.ref_name }}\"|" tap/Casks/raven.rb
-          sed -i "s|sha256 \".*\"|sha256 \"${{ steps.sha.outputs.sha256 }}\"|" tap/Casks/raven.rb
-
-      - name: Commit and push
-        run: |
-          cd tap
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add Casks/raven.rb
-          git commit -m "raven ${{ github.ref_name }}"
-          git push
+          tap: arthurlsy/homebrew-gowey
+          cask: raven
+          tag: ${{ github.ref_name }}
+          url: https://github.com/${{ github.repository }}/releases/download/${{ github.ref_name }}/Raven-macos-silicon.tar.gz
