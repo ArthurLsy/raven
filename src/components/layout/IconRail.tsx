@@ -35,7 +35,7 @@ export function IconRail() {
         width: 56,
         background: "var(--bg-0)",
         borderRight: "1px solid var(--border)",
-        padding: "10px 0",
+        padding: "8px 0",
         alignItems: "center",
         gap: 4,
         flexShrink: 0,

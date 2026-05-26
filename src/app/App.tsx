@@ -33,36 +33,38 @@ export default function App() {
   }, [setPaletteOpen]);
 
   return (
-    <div className="row" style={{ flex: 1, minHeight: 0, alignItems: "stretch" }}>
-      <IconRail />
-      <div className="col" style={{ flex: 1, minWidth: 0, minHeight: 0 }}>
-        <TopBar />
-        <ErrorBanner />
-        <main
-          style={{
-            flex: 1,
-            minHeight: 0,
-            position: "relative",
-            display: "flex",
-            flexDirection: "column",
-          }}
-        >
-          {!repo ? (
-            <EmptyState />
-          ) : view === "changes" ? (
-            <ChangesView />
-          ) : view === "history" ? (
-            <HistoryView />
-          ) : view === "graph" ? (
-            <GraphView />
-          ) : view === "branches" ? (
-            <BranchesView />
-          ) : (
-            <StashView />
-          )}
-          <CommandPalette />
-        </main>
-        <StatusBar />
+    <div className="col" style={{ flex: 1, minHeight: 0 }}>
+      <TopBar />
+      <div className="row" style={{ flex: 1, minHeight: 0, alignItems: "stretch" }}>
+        <IconRail />
+        <div className="col" style={{ flex: 1, minWidth: 0, minHeight: 0 }}>
+          <ErrorBanner />
+          <main
+            style={{
+              flex: 1,
+              minHeight: 0,
+              position: "relative",
+              display: "flex",
+              flexDirection: "column",
+            }}
+          >
+            {!repo ? (
+              <EmptyState />
+            ) : view === "changes" ? (
+              <ChangesView />
+            ) : view === "history" ? (
+              <HistoryView />
+            ) : view === "graph" ? (
+              <GraphView />
+            ) : view === "branches" ? (
+              <BranchesView />
+            ) : (
+              <StashView />
+            )}
+            <CommandPalette />
+          </main>
+          <StatusBar />
+        </div>
       </div>
     </div>
   );

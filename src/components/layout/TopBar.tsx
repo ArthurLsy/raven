@@ -27,9 +27,10 @@ export function TopBar() {
   return (
     <div
       className="row"
+      data-tauri-drag-region
       style={{
-        height: 44,
-        padding: "0 12px 0 16px",
+        height: 40,
+        padding: "0 12px 0 0",
         borderBottom: "1px solid var(--border)",
         background: "var(--bg-1)",
         gap: 8,
@@ -37,6 +38,11 @@ export function TopBar() {
         minWidth: 0,
       }}
     >
+      {/* Traffic light zone — draggable, leaves space for macOS window controls */}
+      <div
+        data-tauri-drag-region
+        style={{ width: 76, height: "100%", flexShrink: 0 }}
+      />
       <RepoSelector />
 
       {repo && (
@@ -57,7 +63,7 @@ export function TopBar() {
         </span>
       )}
 
-      <div style={{ flex: 1 }} />
+      <div data-tauri-drag-region style={{ flex: 1, height: "100%" }} />
 
       {repo && (
         <div
@@ -116,7 +122,7 @@ export function TopBar() {
         </div>
       )}
 
-      <div style={{ flex: 1 }} />
+      <div data-tauri-drag-region style={{ flex: 1, height: "100%" }} />
 
       <button
         onClick={() => setPaletteOpen(true)}
