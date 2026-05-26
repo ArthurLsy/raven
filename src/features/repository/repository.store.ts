@@ -14,14 +14,6 @@ type Selection = {
   staged: boolean;
 } | null;
 
-export type PendingSuggestion = {
-  type: string;
-  scope: string;
-  subject: string;
-  body: string;
-  _id: number;
-};
-
 type State = {
   repo: RepositoryInfo | null;
   status: GitStatus | null;
@@ -32,9 +24,7 @@ type State = {
   loading: boolean;
   error: string | null;
   statusMsg: string;
-  aiOpen: boolean;
   paletteOpen: boolean;
-  pendingSuggestion: PendingSuggestion | null;
 };
 
 type Actions = {
@@ -47,10 +37,7 @@ type Actions = {
   setView: (v: View) => void;
   setError: (e: string | null) => void;
   setStatusMsg: (m: string) => void;
-  setAiOpen: (o: boolean) => void;
   setPaletteOpen: (o: boolean) => void;
-  applySuggestion: (s: Omit<PendingSuggestion, "_id">) => void;
-  consumeSuggestion: () => void;
 };
 
 export const useRepoStore = create<State & Actions>((set, get) => ({
@@ -63,9 +50,7 @@ export const useRepoStore = create<State & Actions>((set, get) => ({
   loading: false,
   error: null,
   statusMsg: "All systems normal",
-  aiOpen: false,
   paletteOpen: false,
-  pendingSuggestion: null,
 
   async openRepository(path) {
     set({ loading: true, error: null });
@@ -131,22 +116,8 @@ export const useRepoStore = create<State & Actions>((set, get) => ({
     set({ statusMsg: m });
   },
 
-  setAiOpen(o) {
-    set({ aiOpen: o });
-  },
-
   setPaletteOpen(o) {
     set({ paletteOpen: o });
   },
 
-  applySuggestion(s) {
-    set({
-      pendingSuggestion: { ...s, _id: Date.now() },
-      aiOpen: false,
-    });
-  },
-
-  consumeSuggestion() {
-    set({ pendingSuggestion: null });
-  },
 }));

@@ -3,7 +3,6 @@ import { Icons } from "@/lib/icons";
 import { Kbd } from "@/components/ui/kbd";
 import { api, errorMessage } from "@/lib/tauri";
 import { useRepoStore } from "@/features/repository/repository.store";
-import { useTweaks } from "@/features/tweaks/tweaks.store";
 
 const TYPES = [
   "feat",
@@ -23,40 +22,13 @@ export function CommitComposer() {
   const refreshStatus = useRepoStore((s) => s.refreshStatus);
   const setError = useRepoStore((s) => s.setError);
   const setStatusMsg = useRepoStore((s) => s.setStatusMsg);
-  const setAiOpen = useRepoStore((s) => s.setAiOpen);
-  const pending = useRepoStore((s) => s.pendingSuggestion);
-  const consumeSuggestion = useRepoStore((s) => s.consumeSuggestion);
-  const aiAssist = useTweaks((s) => s.aiAssist);
 
   const [type, setType] = React.useState<string>("feat");
   const [scope, setScope] = React.useState<string>("");
   const [subject, setSubject] = React.useState<string>("");
   const [body, setBody] = React.useState<string>("");
   const [bodyOpen, setBodyOpen] = React.useState(false);
-  const [typing, setTyping] = React.useState(false);
   const [committing, setCommitting] = React.useState(false);
-
-  // Typewriter effect when an AI suggestion is applied
-  React.useEffect(() => {
-    if (!pending) return;
-    setType(pending.type);
-    setScope(pending.scope);
-    setBody(pending.body);
-    setBodyOpen(true);
-    setSubject("");
-    setTyping(true);
-    let i = 0;
-    const iv = window.setInterval(() => {
-      i += 2;
-      setSubject(pending.subject.slice(0, i));
-      if (i >= pending.subject.length) {
-        window.clearInterval(iv);
-        setTyping(false);
-        consumeSuggestion();
-      }
-    }, 16);
-    return () => window.clearInterval(iv);
-  }, [pending, consumeSuggestion]);
 
   const stagedCount = React.useMemo(
     () => status?.files.filter((f) => f.staged && !f.conflicted).length ?? 0,
@@ -72,7 +44,7 @@ export function CommitComposer() {
         : "var(--text-4)";
 
   const fullMsg = `${type}${scope ? `(${scope})` : ""}: ${subject || "…"}`;
-  const canCommit = !!subject.trim() && stagedCount > 0 && !typing && !committing && !!repo;
+  const canCommit = !!subject.trim() && stagedCount > 0 && !committing && !!repo;
 
   async function handleCommit() {
     if (!repo || !canCommit) return;
@@ -133,27 +105,6 @@ export function CommitComposer() {
         <span className="mono" style={{ color: "var(--text-4)", fontSize: 11 }}>
           {stagedCount} staged
         </span>
-        <div style={{ flex: 1 }} />
-        {aiAssist && (
-          <button
-            onClick={() => setAiOpen(true)}
-            className="row gap-1"
-            title="Generate commit (⌘J)"
-            style={{
-              padding: "3px 8px",
-              borderRadius: 6,
-              fontSize: 11,
-              fontWeight: 500,
-              color: "var(--accent)",
-              background: "var(--accent-soft)",
-              border: "1px solid var(--accent-line)",
-              whiteSpace: "nowrap",
-            }}
-          >
-            <Icons.Sparkles size={11} />
-            AI compose
-          </button>
-        )}
       </div>
 
       <div className="row gap-2" style={{ padding: "4px 14px 6px" }}>
@@ -221,23 +172,6 @@ export function CommitComposer() {
             letterSpacing: -0.1,
           }}
         />
-        {typing && (
-          <div
-            className="row gap-1"
-            style={{ marginTop: 6, color: "var(--accent)", fontSize: 10.5 }}
-          >
-            <span
-              className="pulse-dot"
-              style={{
-                width: 6,
-                height: 6,
-                borderRadius: 999,
-                background: "var(--accent)",
-              }}
-            />
-            AI is writing…
-          </div>
-        )}
       </div>
 
       <button

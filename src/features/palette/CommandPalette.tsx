@@ -17,7 +17,6 @@ export function CommandPalette() {
   const open = useRepoStore((s) => s.paletteOpen);
   const setOpen = useRepoStore((s) => s.setPaletteOpen);
   const setView = useRepoStore((s) => s.setView);
-  const setAiOpen = useRepoStore((s) => s.setAiOpen);
   const openRepository = useRepoStore((s) => s.openRepository);
   const refreshStatus = useRepoStore((s) => s.refreshStatus);
   const setError = useRepoStore((s) => s.setError);
@@ -52,16 +51,6 @@ export function CommandPalette() {
   };
 
   const all: Item[] = [
-    {
-      g: "Actions",
-      i: Icons.Sparkles,
-      l: "Generate commit message",
-      k: "⌘ J",
-      run: () => {
-        setAiOpen(true);
-        setOpen(false);
-      },
-    },
     { g: "Actions", i: Icons.Push, l: "Push to origin", k: "⇧ ⌘ P", run: () => remote("push") },
     { g: "Actions", i: Icons.Pull, l: "Pull from origin", k: "⇧ ⌘ L", run: () => remote("pull") },
     { g: "Actions", i: Icons.Fetch, l: "Fetch", run: () => remote("fetch") },

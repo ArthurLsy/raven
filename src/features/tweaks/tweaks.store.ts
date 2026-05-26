@@ -27,7 +27,6 @@ type Tweaks = {
   theme: Theme;
   accent: AccentHue;
   density: Density;
-  aiAssist: boolean;
   showActivity: boolean;
 };
 
@@ -35,7 +34,6 @@ const DEFAULT_TWEAKS: Tweaks = {
   theme: "dark",
   accent: "285",
   density: "cozy",
-  aiAssist: true,
   showActivity: true,
 };
 

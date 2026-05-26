@@ -12,13 +12,11 @@ import { HistoryView } from "@/features/history/HistoryView";
 import { GraphView } from "@/features/graph/GraphView";
 import { BranchesView } from "@/features/branches/BranchesView";
 import { StashView } from "@/features/stash/StashView";
-import { AISuggestModal } from "@/features/ai/AISuggestModal";
 import { CommandPalette } from "@/features/palette/CommandPalette";
 
 export default function App() {
   const repo = useRepoStore((s) => s.repo);
   const view = useRepoStore((s) => s.view);
-  const setAiOpen = useRepoStore((s) => s.setAiOpen);
   const setPaletteOpen = useRepoStore((s) => s.setPaletteOpen);
 
   // Global shortcuts
@@ -29,14 +27,10 @@ export default function App() {
         e.preventDefault();
         setPaletteOpen(true);
       }
-      if (meta && (e.key === "j" || e.key === "J")) {
-        e.preventDefault();
-        setAiOpen(true);
-      }
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [setAiOpen, setPaletteOpen]);
+  }, [setPaletteOpen]);
 
   return (
     <div className="row" style={{ flex: 1, minHeight: 0, alignItems: "stretch" }}>
@@ -66,7 +60,6 @@ export default function App() {
           ) : (
             <StashView />
           )}
-          <AISuggestModal />
           <CommandPalette />
         </main>
         <StatusBar />
