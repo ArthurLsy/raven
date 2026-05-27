@@ -122,12 +122,11 @@ export function ChangesPanel() {
           {files.length}
         </div>
         <div style={{ flex: 1 }} />
-        <IconBtn title="Stage all" onClick={handleStageAll}>
-          <Icons.Plus size={13} />
-        </IconBtn>
-        <IconBtn title="Unstage all" onClick={handleUnstageAll}>
-          <Icons.Minus size={13} />
-        </IconBtn>
+        <MasterCheckbox
+          files={files}
+          onStageAll={handleStageAll}
+          onUnstageAll={handleUnstageAll}
+        />
         <IconBtn title="Refresh" onClick={() => refreshStatus()}>
           <Icons.Refresh size={13} />
         </IconBtn>
@@ -213,6 +212,59 @@ export function ChangesPanel() {
 
       <CommitComposer />
     </div>
+  );
+}
+
+function MasterCheckbox({
+  files,
+  onStageAll,
+  onUnstageAll,
+}: {
+  files: GroupedFile[];
+  onStageAll: () => void;
+  onUnstageAll: () => void;
+}) {
+  const ref = React.useRef<HTMLInputElement>(null);
+  const stagedCount = files.filter((f) => f.staged).length;
+  const allStaged = files.length > 0 && stagedCount === files.length;
+  const someStaged = stagedCount > 0 && !allStaged;
+
+  React.useEffect(() => {
+    if (ref.current) ref.current.indeterminate = someStaged;
+  }, [someStaged]);
+
+  function handleChange() {
+    if (allStaged) onUnstageAll();
+    else onStageAll();
+  }
+
+  return (
+    <label
+      title={allStaged ? "Unstage all" : "Stage all"}
+      style={{
+        display: "flex",
+        alignItems: "center",
+        gap: 5,
+        cursor: files.length === 0 ? "default" : "pointer",
+        color: "var(--text-3)",
+        fontSize: 11,
+        userSelect: "none",
+      }}
+    >
+      <input
+        ref={ref}
+        type="checkbox"
+        checked={allStaged}
+        onChange={handleChange}
+        disabled={files.length === 0}
+        style={{
+          width: 13,
+          height: 13,
+          accentColor: "var(--accent)",
+          cursor: files.length === 0 ? "default" : "pointer",
+        }}
+      />
+    </label>
   );
 }
 
